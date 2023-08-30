@@ -15,8 +15,10 @@ export const handler = middy(
 
     return undefined
 
-handler.use(
-  cors({
-    credentials: true
-  })
+    handler.use(
+      cors({
+        credentials: true
+      })
+    )
+  }
 )
