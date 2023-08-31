@@ -6,10 +6,9 @@ import { cors, httpErrorHandler } from 'middy/middlewares'
 import * as AWSXRay from 'aws-xray-sdk'
 import * as AWS from 'aws-sdk'
 
-import { createAttachmentPresignedUrl } from '../../businessLogic/todos'
 import { getUserId } from '../utils'
 
-import { setItemUrl } from '../../businessLogic/todos'
+import { setItemUrl } from '../../businessLogic/todo'
 import * as uuid from 'uuid';
 
 const bucketName = process.env.ATTACHMENTS_S3_BUCKET
@@ -32,9 +31,7 @@ export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const todoId = event.pathParameters.todoId
     // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
-    const authorization = event.headers.Authorization;
-    const split = authorization.split(' ')
-    const jwtToken = split[1]
+    const jwtToken = getUserId(event)
     const id = uuid.v4();
     setItemUrl(todoId, `https://${bucketName}.s3.amazonaws.com/${id}`, jwtToken);
     const url = getUploadUrl(id)

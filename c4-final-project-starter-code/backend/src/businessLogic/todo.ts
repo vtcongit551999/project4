@@ -1,18 +1,13 @@
 import { TodosAccess } from '../dataLayer/todosAcess'
-import { AttachmentUtils } from '../helpers/attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
-import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
-import * as createError from 'http-errors'
 import { decode } from 'jsonwebtoken'
 
 import { JwtPayload } from '../auth/JwtPayload'
 
 // TODO: Implement businessLogic
-const logger = createLogger('TodosAcess');
-const attachmentUtils = new AttachmentUtils();
 const todosAcess = new TodosAccess();
 
 // write create todo function
