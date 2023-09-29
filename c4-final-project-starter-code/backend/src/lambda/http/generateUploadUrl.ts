@@ -8,7 +8,7 @@ import * as AWS from 'aws-sdk'
 
 import { getUserId } from '../utils'
 
-import { setItemUrl } from '../../businessLogic/todo'
+import { setItemUrl } from '../../businessLogic/todos'
 import * as uuid from 'uuid';
 
 const bucketName = process.env.ATTACHMENTS_S3_BUCKET

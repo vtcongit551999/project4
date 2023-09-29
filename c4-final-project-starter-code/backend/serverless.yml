@@ -1,23 +1,18 @@
 # TODO: Change the name of the org 
-org: cong551999
-app: serverless-todo-app
 service: serverless-todo-app
-frameworkVersion: '3.34.0'
-configValidationMode: warn
+
 
 plugins:
   - serverless-webpack
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
   - serverless-iam-roles-per-function
-  - serverless-plugin-canary-deployments
-  - serverless-dynamodb-local
-  - serverless-offline
+  - serverless-plugin-tracing
 
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs16.x
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
@@ -31,7 +26,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-898647410339-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   logs:
@@ -46,6 +41,21 @@ provider:
             - xray:PutTelemetryRecords
             - xray:PutTraceSegments
           Resource: "*"
+
+custom:
+    documentation:
+      api:
+        info:
+          version: "1"
+          title: Udagram API
+          description: Serverless application for todo app
+      models:
+        - name: TodoCreateRequest
+          contentType: application/json
+          schema: ${file(models/create-todo-model.json)}
+        - name: TodoUpdateRequest
+          contentType: application/json
+          schema: ${file(models/update-todo-model.json)}
 
 
 functions:
@@ -63,7 +73,6 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
-          reqValidatorName: RequestBodyValidator
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
@@ -104,7 +113,6 @@ functions:
       - http:
           cors: true
           method: patch
-          reqValidatorName: RequestBodyValidator
           path: todos/{todoId}
           authorizer: Auth
           documentation:
@@ -122,7 +130,6 @@ functions:
           cors: true
           method: delete
           path: todos/{todoId}
-          reqValidatorName: RequestBodyValidator
           documentation:
             summary: Delete a new TODO
             description: Delete a new TODO
@@ -144,7 +151,6 @@ functions:
           path: todos/{todoId}/attachment
           cors: true
           authorizer: Auth
-          reqValidatorName: RequestBodyValidator
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -190,9 +196,9 @@ resources:
           - AttributeName: userId
             AttributeType: S
         KeySchema:
-          - AttributeName: todoId
+          - AttributeName: userId
             KeyType: HASH
-          - AttributeName: createdAt
+          - AttributeName: todoId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
@@ -211,6 +217,11 @@ resources:
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       Properties:
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
         BucketName: ${self:provider.environment.ATTACHMENT_S3_BUCKET}
         CorsConfiguration:
           CorsRules:
