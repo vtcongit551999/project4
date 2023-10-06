@@ -3,26 +3,21 @@ import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import * as uuid from 'uuid'
-import { decode } from 'jsonwebtoken'
-
-import { JwtPayload } from '../auth/JwtPayload'
 
 // TODO: Implement businessLogic
 const todosAcess = new TodosAccess();
 
 // write create todo function
 
-export async function getAllTodos(jwtToken: string): Promise<TodoItem[]> {
-    const userId = parseUserId(jwtToken)
+export async function getAllTodos(userId: string): Promise<TodoItem[]> {
     return todosAcess.getAllTodos(userId)
 }
 
 export async function createTodo(
     createTodoRequest: CreateTodoRequest,
-    jwtToken: string
+    userId: string
 ): Promise<TodoItem> {
     const todoId = uuid.v4()
-    const userId = parseUserId(jwtToken)
 
     return todosAcess.createTodoItem({
         todoId: todoId,
@@ -34,30 +29,27 @@ export async function createTodo(
     })
 }
 
-export async function getTodoItem(todoId: string, jwtToken: string): Promise<TodoItem> {
-    const userId = parseUserId(jwtToken)
+export async function getTodoItem(todoId: string, userId: string): Promise<TodoItem> {
     return await todosAcess.getTodoItem(todoId, userId)
 }
 
-export async function setItemUrl(todoId: string, itemUrl: string, jwtToken: string): Promise<void> {
+export async function setItemUrl(todoId: string, itemUrl: string, userId: string): Promise<void> {
     console.log("Setting Item URL")
     console.log(itemUrl)
     console.log(todoId)
-    const userId = parseUserId(jwtToken)
     const todoItem = await todosAcess.getTodoItem(todoId, userId)
 
-    todosAcess.setItemUrl(todoItem.todoId, todoItem.createdAt, itemUrl);
+    todosAcess.setItemUrl(todoItem.todoId, todoItem.userId, itemUrl);
 }
 
 export async function updateTodo(
     todoId: string,
     updateTodoRequest: UpdateTodoRequest,
-    jwtToken: string
+    userId: string
 ): Promise<void> {
     console.log("Updating Item")
     console.log(updateTodoRequest)
     console.log(todoId)
-    const userId = parseUserId(jwtToken)
 
     const todoItem = await todosAcess.getTodoItem(todoId, userId)
 
@@ -71,16 +63,11 @@ export async function updateTodo(
 
 export async function deleteTodo(
     itemId: string,
-    jwtToken: string
+    userId: string
 ): Promise<void> {
 
-    const userId = parseUserId(jwtToken)
     const todoItem = await todosAcess.getTodoItem(itemId, userId)
-    await todosAcess.deleteTodo(todoItem.todoId, todoItem.createdAt)
+    await todosAcess.deleteTodo(todoItem.todoId, todoItem.userId)
 }
 
-function parseUserId(jwtToken: string): string {
-    const decodedJwt = decode(jwtToken) as JwtPayload
-    return decodedJwt.sub
-}
 

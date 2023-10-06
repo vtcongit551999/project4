@@ -20,9 +20,9 @@ export class TodosAccess {
             .query({
                 TableName: this.todosTable,
                 IndexName: this.todosIndex,
-                KeyConditionExpression: 'userId= :userId',
+                KeyConditionExpression: 'userId = :userId',
                 ExpressionAttributeValues: {
-                    'userId': userID
+                    ':userId': userID
                 }
             })
             .promise()
@@ -65,7 +65,7 @@ export class TodosAccess {
             TableName: this.todosTable,
             Key: {
                 "todoId": todoId,
-                "createdAt": userID
+                "userId": userID
             },
             UpdateExpression:
                 'set #n = :name, done = :done, dueDate = :dueDate',
@@ -81,31 +81,31 @@ export class TodosAccess {
         };
         this.docClient.update(result).promise()
     }
-    async deleteTodo(todoId: string, createdAt: string): Promise<void> {
+    async deleteTodo(todoId: string, userId: string): Promise<void> {
 
         var params = {
             TableName: this.todosTable,
             Key: {
                 "todoId": todoId,
-                "createdAt": createdAt
+                "userId": userId
             },
             ConditionExpression:
-                'todoId = :todoId and createdAt = :createdAt',
+                'todoId = :todoId and userId = :userId',
             ExpressionAttributeValues: {
                 ':todoId': todoId,
-                ':createdAt': createdAt
+                ':userId': userId
             }
         }
 
         await this.docClient.delete(params).promise()
     }
 
-    async setItemUrl(todoId: string, createdAt: string, itemUrl: string): Promise<void> {
+    async setItemUrl(todoId: string, userId: string, itemUrl: string): Promise<void> {
         var params = {
             TableName: this.todosTable,
             Key: {
-                todoId,
-                createdAt
+                userId: userId,
+                todoId: todoId
             },
             UpdateExpression: 'set attachmentUrl = :attachmentUrl',
             ExpressionAttributeValues: {

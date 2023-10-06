@@ -26,7 +26,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-898647410339-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-12312-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   logs:
@@ -120,6 +120,12 @@ functions:
             description: Update a new TODO
             requestModels:
               'application/json': TodoUpdateRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:UpdateItem            
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
